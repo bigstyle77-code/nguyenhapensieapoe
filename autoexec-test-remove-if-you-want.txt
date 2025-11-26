@@ -1,0 +1,113 @@
+local Players = game:GetService("Players")
+local Stats = game:GetService("Stats")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+ScreenGui.IgnoreGuiInset = true
+
+-- FRAME CHÍNH (ĐÃ THU NHỎ)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 145, 0, 135)  -- ⬅ KHUNG MINI VỪA ĐỦ JOB ID
+Frame.Position = UDim2.new(0, 10, 0, 260)
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.BackgroundTransparency = 0.15
+Frame.BorderSizePixel = 0
+Frame.ClipsDescendants = true
+
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 8)
+
+local UIListLayout = Instance.new("UIListLayout", Frame)
+UIListLayout.Padding = UDim.new(0, 4)
+UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- HÀM TẠO TEXT
+local function NewText(txt)
+    local label = Instance.new("TextLabel", Frame)
+    label.Size = UDim2.new(1, -10, 0, 18)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 13 -- 👈 thu nhỏ chữ để vừa khung
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = txt
+    return label
+end
+
+-- CÁC DÒNG TEXT
+local tierLabel = NewText("Tier: 1")
+tierLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+local fpsLabel = NewText("FPS: Loading…")
+local pingLabel = NewText("Ping: Loading…")
+local countLabel = NewText("Server: Loading…")
+local jobIdLabel = NewText("Job ID: " .. game.JobId)
+
+----------------------------------------------------------
+-- FPS
+local frames = 0
+RunService.RenderStepped:Connect(function()
+    frames += 1
+end)
+
+task.spawn(function()
+    while task.wait(1) do
+        fpsLabel.Text = "FPS: " .. frames
+        frames = 0
+    end
+end)
+
+----------------------------------------------------------
+-- PING
+task.spawn(function()
+    while task.wait(1) do
+        local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        pingLabel.Text = "Ping: " .. ping .. " ms"
+    end
+end)
+
+----------------------------------------------------------
+-- PLAYER COUNT
+local function UpdatePlayerCount()
+    countLabel.Text = "Server: " .. #Players:GetPlayers() .. "/12"
+end
+
+Players.PlayerAdded:Connect(UpdatePlayerCount)
+Players.PlayerRemoving:Connect(UpdatePlayerCount)
+
+task.spawn(function()
+    while task.wait(1) do UpdatePlayerCount() end
+end)
+
+UpdatePlayerCount()
+
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Parent = gui
+frame.Size = UDim2.new(0.3, 0, 0.1, 0)
+frame.Position = UDim2.new(0.7, 0, 0.85, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 0.3
+frame.BorderSizePixel = 0
+frame.Active = true
+
+local textLabel = Instance.new("TextLabel")
+textLabel.Parent = frame
+textLabel.Size = UDim2.new(1, 0, 1, 0)
+textLabel.BackgroundTransparency = 1
+textLabel.TextScaled = true
+textLabel.Font = Enum.Font.SourceSansBold
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.TextStrokeTransparency = 0.5
+textLabel.Text = player.Name
